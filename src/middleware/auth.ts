@@ -18,6 +18,15 @@ const auth = (...roles: string[]) => {
 
       req.user = decoded;
 
+      if (decoded.role === "customer") {
+        if (String(decoded.id) === req.params.id) {
+          return next();
+        } else {
+          return res.status(500).json({
+            error: "Unauthorized!!!",
+          });
+        }
+      }
       if (roles.length && !roles.includes(decoded.role)) {
         return res.status(500).json({
           error: "Unauthorized!!!",

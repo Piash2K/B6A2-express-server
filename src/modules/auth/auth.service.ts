@@ -34,13 +34,14 @@ const signinUser = async (email: string, password: string) => {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      id: user.id,
     },
     config.jwt_secret!,
     {
       expiresIn: "7d",
     }
   );
-  console.log({token});
+  console.log({ token });
   return { token, user };
 };
 
