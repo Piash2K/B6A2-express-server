@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import initDB from "./config/db";
 import { vehicleRoutes } from "./modules/vehicles/vehicles.routes";
 import { authRoutes } from "./modules/auth/auth.routes";
+import { userRoutes } from "./modules/users/users.routes";
 
 const app = express();
 
@@ -16,6 +17,9 @@ app.use("/api/v1/auth/", authRoutes);
 
 //vehicles CRUD
 app.use("/api/v1/vehicles", vehicleRoutes);
+
+//users routes
+app.use("/api/v1/users", userRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
