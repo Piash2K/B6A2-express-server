@@ -9,4 +9,4 @@ router.get("/", vehicleControllers.getVehicle);
 
 router.get("/:id", vehicleControllers.getSingleVehicle);
 
-export default router;
+export const vehicleRoutes = router;

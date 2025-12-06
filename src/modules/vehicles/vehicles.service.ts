@@ -31,6 +31,10 @@ const getSingleVehicle = async (id: string) => {
   return result;
 };
 
+// const updateVehicle = async()=>{
+//     const result = await pool.query(`UPDATE FROM Vehicles WHERE SET `)
+// }
+
 export const vehicleServices = {
   createVehicle,
   getVehicle,
