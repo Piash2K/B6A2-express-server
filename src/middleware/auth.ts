@@ -24,19 +24,17 @@ const auth = (...roles: string[]) => {
       console.log(decoded);
 
       req.user = decoded;
-
-      if (decoded.role === "customer") {
-        if (req.params.id && String(decoded.id) !== req.params.id) {
-          return res.status(403).json({
-            error: "Unauthorized!!!",
-          });
-        }
-        return next();
-      }
       if (roles.length && !roles.includes(decoded.role)) {
         return res.status(403).json({
           error: "You do not have permission to perform this action",
         });
+      }
+      if (decoded.role === "customer" && req.params.id) {
+        if (String(decoded.id) !== req.params.id) {
+          return res.status(403).json({
+            error: "Unauthorized to access this resource",
+          });
+        }
       }
       next();
     } catch (error: any) {

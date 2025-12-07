@@ -76,7 +76,7 @@ const createBooking = async (payload: Record<string, unknown>) => {
 };
 
 const getBooking = async (user: any) => {
-  await autoMarkReturned()
+  await autoMarkReturned();
   if (user.role === "admin") {
     const bookingResult = await pool.query(`SELECT * FROM Bookings`);
 
@@ -127,7 +127,7 @@ const updateBooking = async (
   payload: Record<string, unknown>,
   id: string
 ) => {
-  await autoMarkReturned()
+  await autoMarkReturned();
   const { status } = payload;
 
   const bookingResult = await pool.query(
@@ -166,7 +166,7 @@ const updateBooking = async (
 
   if (user.role === "admin" && status === "returned") {
     const updatedVehicle = await pool.query(
-      `UPDATE Vehicles SET availability_status ="available" WHERE id=$1 RETURNING *`,
+      `UPDATE Vehicles SET availability_status ='available' WHERE id=$1 RETURNING *`,
       [updatedBooking.vehicle_id]
     );
     return {
