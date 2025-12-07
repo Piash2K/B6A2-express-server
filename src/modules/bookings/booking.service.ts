@@ -1,4 +1,24 @@
 import { pool } from "../../config/db";
+const autoMarkReturned = async () => {
+  try {
+    const { rows: overdueBookings } = await pool.query(
+      `SELECT * FROM Bookings WHERE status='active' AND rent_end_date < NOW()`
+    );
+
+    for (const booking of overdueBookings) {
+      await pool.query(`UPDATE Bookings SET status='returned' WHERE id=$1`, [
+        booking.id,
+      ]);
+      await pool.query(
+        `UPDATE Vehicles SET availability_status='available' WHERE id=$1`,
+        [booking.vehicle_id]
+      );
+      console.log(`Booking ${booking.id} marked as returned automatically.`);
+    }
+  } catch (error) {
+    console.error("Error in autoMarkReturned:", error);
+  }
+};
 
 const createBooking = async (payload: Record<string, unknown>) => {
   const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload!;
@@ -56,6 +76,7 @@ const createBooking = async (payload: Record<string, unknown>) => {
 };
 
 const getBooking = async (user: any) => {
+  await autoMarkReturned()
   if (user.role === "admin") {
     const bookingResult = await pool.query(`SELECT * FROM Bookings`);
 
@@ -106,6 +127,7 @@ const updateBooking = async (
   payload: Record<string, unknown>,
   id: string
 ) => {
+  await autoMarkReturned()
   const { status } = payload;
 
   const bookingResult = await pool.query(
@@ -118,11 +140,21 @@ const updateBooking = async (
   }
   const booking = bookingResult.rows[0];
 
-  if (user.role === "customer" && status !== "cancelled") {
-    return {
-      success: false,
-      message: "Customers can only cancel their booking",
-    };
+  if (user.role === "customer") {
+    if (status !== "cancelled") {
+      return {
+        success: false,
+        message: "Customers can only cancel their booking",
+      };
+    }
+    const now = new Date();
+    const startDate = new Date(booking.rent_start_date);
+    if (now >= startDate) {
+      return {
+        success: false,
+        message: "Cannot cancel booking after start date",
+      };
+    }
   }
 
   const updated = await pool.query(
