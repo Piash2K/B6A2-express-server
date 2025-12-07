@@ -149,11 +149,13 @@ const updateBooking = async (
   if (status === "cancelled") {
     return {
       success: true,
+      message: "Booking cancelled successfully",
       data: updatedBooking,
     };
   }
   return {
     success: true,
+    message: "Booking updated successfully",
     data: updatedBooking,
   };
 };

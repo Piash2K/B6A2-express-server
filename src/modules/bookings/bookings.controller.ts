@@ -42,24 +42,16 @@ const updateBooking = async (req: Request, res: Response) => {
     );
 
     if (!result?.success) {
-     return                                                                                                                                                                                                                                                                                                                                                                        res.status(400).json({
+      return res.status(400).json({
         success: false,
-        message: result?.message,
+        message: result.message,
       });
     }
 
-    let message = "Bookings update successfully";
-
-    if (req.body.status === "cancelled") {
-      message = "Booking cancelled successfully";
-    }
-    if (req.body.status === "returned") {
-      message = "Booking marked as returned. Vehicle is now available";
-    }
     res.status(200).json({
       success: true,
-      message,
-      data: result,
+      message: result.message,
+      data: result.data,
     });
   } catch (error: any) {
     res.status(500).json({
