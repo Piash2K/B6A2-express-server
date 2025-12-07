@@ -25,7 +25,23 @@ const updateUser = async (payload: Record<string, unknown>, id: string) => {
   return result;
 };
 
+const deleteUser = async (id: string) => {
+  const bookings = await pool.query(
+    `SELECT * FROM Bookings WHERE customer_id=$1 AND status='active'`,
+    [id]
+  );
+  if (bookings.rows.length > 0) {
+    throw new Error("Cannot delete user: active bookings exist");
+  }
+  const existing = await pool.query(`SELECT * FROM Users WHERE id=$1`, [id]);
+  if (existing.rows.length === 0) {
+    throw new Error("User not found");
+  }
+
+  await pool.query(`DELETE FROM Users WHERE id=$1`, [id]);
+};
 export const userServices = {
   getAllUser,
   updateUser,
+  deleteUser,
 };
