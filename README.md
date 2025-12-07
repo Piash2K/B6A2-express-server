@@ -47,8 +47,7 @@ A **backend API** for managing vehicle rentals, bookings, and users with role-ba
 - **Database:** PostgreSQL
 - **Authentication:** JWT, bcrypt
 - **Tools & Libraries:**  
-  - dotenv (environment variables)  
-  - nodemon (development server)  
+  - dotenv (environment variables)   
   - pg (PostgreSQL client)  
 
 ---
