@@ -97,7 +97,66 @@ const getBooking = async (user: any) => {
     };
   }
 };
+
+const updateBooking = async (
+  user: any,
+  payload: Record<string, unknown>,
+  id: string
+) => {
+  const { status } = payload;
+
+  const bookingResult = await pool.query(
+    `SELECT * FROM Bookings WHERE id =$1`,
+    [id]
+  );
+
+  if (bookingResult.rows.length === 0) {
+    return { success: false, message: "Booking not found" };
+  }
+  const booking = bookingResult.rows[0];
+
+  if (user.role === "customer" && status !== "cancelled") {
+    return {
+      success: false,
+      message: "Customers can only cancel their booking",
+    };
+  }
+
+  const updated = await pool.query(
+    `UPDATE Bookings SET status=$1 WHERE id =  $2 RETURNING *`,
+    [status, id]
+  );
+
+  const updatedBooking = updated.rows[0];
+
+  if (user.role === "admin" && status === "returned") {
+    const updatedVehicle = await pool.query(
+      `UPDATE Vehicles SET availability_status ="available" WHERE id=$1 RETURNING *`,
+      [updatedBooking.vehicle_id]
+    );
+    return {
+      success: true,
+      message: "Booking marked as returned. Vehicle is now available",
+      data: {
+        ...updatedBooking,
+        vehicle: updatedVehicle.rows[0],
+      },
+    };
+  }
+  if (status === "cancelled") {
+    return {
+      success: true,
+      data: updatedBooking,
+    };
+  }
+  return{
+    success: true,
+    data: updatedBooking
+  }
+};
+
 export const bookingServices = {
   createBooking,
-  getBooking
+  getBooking,
+  updateBooking,
 };
