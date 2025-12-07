@@ -5,16 +5,17 @@ const createBooking = async (payload: Record<string, unknown>) => {
 
   const start = new Date(rent_start_date as string);
   const end = new Date(rent_end_date as string);
-
-  const totalDays =
-    Math.ceil(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+  if (end <= start) throw new Error("End date must be after start date");
+  const totalDays = Math.ceil(
+    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
   const vehicleResult = await pool.query(
     `SELECT vehicle_name, daily_rent_price, availability_status FROM Vehicles WHERE id = $1`,
     [vehicle_id]
   );
 
-  if (!vehicleResult.rows) {
+  if (vehicleResult.rows.length === 0) {
     return { success: false, message: "Vehicle not found" };
   }
 
@@ -38,15 +39,18 @@ const createBooking = async (payload: Record<string, unknown>) => {
     ]
   );
 
-  const updateStatus = await pool.query(
+  await pool.query(
     `UPDATE Vehicles SET availability_status= $1 WHERE id=$2 RETURNING *`,
     ["booked", vehicle_id]
   );
   return {
-    ...result.rows[0],
-    vehicle: {
-      vehicle_name: vehicle.vehicle_name,
-      daily_rent_price: vehicle.daily_rent_price,
+    success: true,
+    data: {
+      ...result.rows[0],
+      vehicle: {
+        vehicle_name: vehicle.vehicle_name,
+        daily_rent_price: vehicle.daily_rent_price,
+      },
     },
   };
 };
@@ -59,7 +63,7 @@ const getBooking = async (user: any) => {
 
     for (const booking of bookings) {
       const customerResult = await pool.query(
-        `SELECT * FROM Users WHERE id =$1`,
+        `SELECT name,email FROM Users WHERE id =$1`,
         [booking.customer_id]
       );
       const vehiclesResult = await pool.query(
@@ -89,13 +93,12 @@ const getBooking = async (user: any) => {
     );
 
     booking.vehicle = vehicleRes.rows[0];
-
-    return {
-      success: true,
-      message: "Your bookings retrieved successfully",
-      data: bookings,
-    };
   }
+  return {
+    success: true,
+    message: "Your bookings retrieved successfully",
+    data: bookings,
+  };
 };
 
 const updateBooking = async (
@@ -149,10 +152,10 @@ const updateBooking = async (
       data: updatedBooking,
     };
   }
-  return{
+  return {
     success: true,
-    data: updatedBooking
-  }
+    data: updatedBooking,
+  };
 };
 
 export const bookingServices = {
