@@ -26,6 +26,12 @@ const updateUser = async (req: Request, res: Response) => {
         message: "You are not allowed to update this profile",
       });
     }
+     if (req.user!.role === "customer" && "role" in req.body) {
+      return res.status(403).json({
+        success: false,
+        message: "Customers are not allowed to change their role",
+      });
+    }
 
     const result = await userServices.updateUser(req.body, req.params.id!);
     res.status(200).json({
