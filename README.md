@@ -150,7 +150,7 @@ Authorization: Bearer <your_jwt_token>
 
 ## **Author**
 
-Piash Islam – Junior MERN Stack Developer  
+Piash Islam – Full Stack Developer  
 [LinkedIn](https://www.linkedin.com/in/piash-islam) | [GitHub](https://github.com/piash2k)
 
 ---
